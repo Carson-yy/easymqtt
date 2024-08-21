@@ -6,11 +6,11 @@ package io.easymqtt.core;
 import io.easymqtt.domain.ClientId;
 import io.easymqtt.domain.ClientInstance;
 import io.easymqtt.exceptions.EasyMqttException;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Project Name: easymqtt
@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public final class MqttClientContainer {
 
+    private static final Logger LOGGER = Logger.getLogger(MqttClientContainer.class.getName());
+
     private MqttClientContainer() {
     }
 
@@ -30,10 +32,6 @@ public final class MqttClientContainer {
      */
     private static final Map<ClientId, ClientInstance> CLIENTS = new HashMap<>(16);
 
-    /**
-     * client id list
-     */
-    private static final List<String> CLIENT_ID_LIST = new ArrayList<>();
 
     /**
      * Method Description: register client
@@ -43,12 +41,31 @@ public final class MqttClientContainer {
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/19 20:53
      */
-    public static void registerClient(ClientId clientId, ClientInstance clientInstance) {
-        if(CLIENT_ID_LIST.stream().anyMatch(id -> id.equals(clientId.getClientId()))) {
-            throw new EasyMqttException("Mqtt client id is already in use");
-        }
-        CLIENT_ID_LIST.add(clientId.getClientId());
+    static void registerClient(ClientId clientId, ClientInstance clientInstance) {
         CLIENTS.put(clientId, clientInstance);
+    }
+
+    /**
+     * Method Description: subscribe
+     *
+     * @param clientId 客户端
+     * @param topics 订阅topic
+     * @param qos qos
+     * @param listeners 监听器
+     * @author Carson yangbaopan@gmail.com
+     * @date 2024/8/21 22:13
+     */
+    public static void subscribe(ClientId clientId, String[] topics, int[] qos, IMqttMessageListener[] listeners) {
+        ClientInstance clientInstance = CLIENTS.get(clientId);
+        if(Objects.nonNull(clientInstance)) {
+            try{
+                clientInstance.mqttClient().subscribe(topics, qos, listeners);
+            } catch (MqttException e) {
+                throw new EasyMqttException(e.getMessage());
+            }
+        } else {
+            LOGGER.warning("Client " + clientId.clientId() + " instance not found");
+        }
     }
 
     /**
@@ -60,7 +77,7 @@ public final class MqttClientContainer {
      * @date 2024/8/19 21:14
      */
     public static ClientInstance getClientByClientId(String clientId) {
-        return CLIENTS.entrySet().stream().filter(entry -> entry.getKey().getClientId().equals(clientId))
+        return CLIENTS.entrySet().stream().filter(entry -> entry.getKey().clientId().equals(clientId))
                 .findFirst()
                 .map(Map.Entry::getValue)
                 .orElse(null);
@@ -75,9 +92,11 @@ public final class MqttClientContainer {
      * @date 2024/8/19 21:14
      */
     public static ClientInstance getClientByRealClientId(String realClientId) {
-        return CLIENTS.entrySet().stream().filter(entry -> entry.getKey().getRealClientId().equals(realClientId))
+        return CLIENTS.entrySet().stream().filter(entry -> entry.getKey().clientId().equals(realClientId))
                 .findFirst()
                 .map(Map.Entry::getValue)
                 .orElse(null);
     }
+
+
 }

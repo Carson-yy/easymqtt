@@ -6,6 +6,7 @@ package io.easymqtt.core;
 import io.easymqtt.domain.ClientId;
 import io.easymqtt.domain.ClientInstance;
 import io.easymqtt.exceptions.EasyMqttException;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -28,11 +29,11 @@ public final class MqttClientFactory {
      * Method Description: create mqtt client
      *
      * @param mqttConfig mqtt client config
-     * @return io.easymqtt.domain.ClientInstance
      * @author Carson yangbaopan@gmail.com
+     * @return io.easymqtt.domain.ClientId
      * @date 2024/8/19 21:09
      */
-    public static ClientInstance createClient(MqttConfig mqttConfig) throws EasyMqttException {
+    public static ClientId createClient(MqttConfig mqttConfig) throws EasyMqttException {
         try {
             String realClientId = mqttConfig.clientId() + "_" + Math.abs(UUID.randomUUID().hashCode());
             MqttClient client = new MqttClient(mqttConfig.address() + ":" + mqttConfig.port(), realClientId, new MemoryPersistence());
@@ -43,7 +44,12 @@ public final class MqttClientFactory {
             // connect
             client.connect(connOpts);
 
-            return new ClientInstance(new ClientId(mqttConfig.clientId(), realClientId), client);
+            ClientId clientId =new ClientId(mqttConfig.clientId(), realClientId);
+
+            ClientInstance clientInstance = new ClientInstance(clientId, client);
+
+            MqttClientContainer.registerClient(clientId, clientInstance);
+            return clientId;
         } catch (Exception e) {
             throw new EasyMqttException(e.getMessage());
         }
@@ -59,8 +65,12 @@ public final class MqttClientFactory {
      */
     private static MqttConnectOptions getMqttConnectOptions(MqttConfig mqttConfig) {
         MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setUserName(mqttConfig.username());
-        connOpts.setPassword(mqttConfig.password().toCharArray());
+        if(StringUtils.isNoneBlank(mqttConfig.username())) {
+            connOpts.setUserName(mqttConfig.username());
+        }
+        if(StringUtils.isNoneBlank(mqttConfig.password())) {
+            connOpts.setPassword(mqttConfig.password().toCharArray());
+        }
 
         // set clean Session
         connOpts.setCleanSession(mqttConfig.cleanSession());

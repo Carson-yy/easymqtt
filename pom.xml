@@ -11,6 +11,7 @@
   <url>https://hsicloud.cn</url>
   <modules>
     <module>easymqtt-core</module>
+      <module>easymqtt-test</module>
   </modules>
 
   <properties>

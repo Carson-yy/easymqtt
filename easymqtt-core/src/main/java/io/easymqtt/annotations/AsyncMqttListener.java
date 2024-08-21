@@ -8,15 +8,15 @@ import java.lang.annotation.*;
 /**
  * Project Name: easymqtt
  *
- * @author BaoPan.Yang baopan.yang@dyness-tech.com
- * @className MqttListener
- * @description mqtt message listener
- * @date 2024/8/19 20:26
+ * @author Carson yangbaopan@gmail.com
+ * @className AsyncMqttListener
+ * @description 异步注解
+ * @date 2024/8/21 20:29
  */
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MqttListener {
+public @interface AsyncMqttListener {
 
     /**
      * Method Description: mqtt client id, support SpEL
