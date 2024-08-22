@@ -94,4 +94,29 @@ public final class MqttClientContainer {
             }
         }
     }
+
+    /**
+     * Method Description: disconnected mqtt client
+     *
+     * @author Carson yangbaopan@gmail.com
+     * @date 2024/8/22 22:31
+     */
+    public static void disconnected() {
+        CLIENTS.forEach((clientId, o) -> {
+            if(o instanceof AsyncClientInstance asyncClientInstance) {
+                if(asyncClientInstance.mqttClient().isConnected()) {
+                    try{
+                        asyncClientInstance.mqttClient().disconnect();
+                    } catch (Exception ignored) {}
+                }
+            }
+            if(o instanceof ClientInstance clientInstance) {
+                if(clientInstance.mqttClient().isConnected()) {
+                    try{
+                        clientInstance.mqttClient().disconnect();
+                    } catch (Exception ignored) {}
+                }
+            }
+        });
+    }
 }
