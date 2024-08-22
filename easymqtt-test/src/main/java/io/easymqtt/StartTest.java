@@ -7,10 +7,7 @@ import io.easymqtt.core.MqttClientContainer;
 import io.easymqtt.core.MqttClientFactory;
 import io.easymqtt.core.MqttConfig;
 import io.easymqtt.domain.ClientId;
-import io.easymqtt.domain.ClientInstance;
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import io.easymqtt.domain.SubscribeInfo;
 
 /**
  * Project Name: easymqtt
@@ -35,13 +32,15 @@ public class StartTest {
                 true
         );
 
-         ClientId clientId = MqttClientFactory.createClient(mqttConfig);
+        ClientId clientId = MqttClientFactory.createAsyncClient(mqttConfig);
 
-         IMqttMessageListener messageListener = (topic, message) -> {
-             System.out.println("topic: " + topic + " message: " + message);
-         };
+        SubscribeInfo subscribeInfo = new SubscribeInfo(
+                "$SYS/#",
+                0,
+                (info) -> System.out.println(info)
+        );
 
-         MqttClientContainer.subscribe(clientId, new String[]{ "$SYS/#" }, new int[]{ 1 }, new IMqttMessageListener[] {messageListener});
+        MqttClientContainer.subscribe(clientId, subscribeInfo);
 
         try {
             Thread.sleep(10000000L);

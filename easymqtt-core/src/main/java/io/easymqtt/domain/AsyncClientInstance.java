@@ -3,24 +3,22 @@
  */
 package io.easymqtt.domain;
 
-
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 
 /**
  * Project Name: easymqtt
  *
  * @author Carson yangbaopan@gmail.com
- * @className EasyMqttClient
+ * @className AsyncClientInstance
  * @description
- * @date 2024/8/19 20:49
+ * @date 2024/8/22 21:24
  */
-
-public record ClientInstance(
+public record AsyncClientInstance (
         // mqtt client id
         ClientId clientId,
 
         // mqtt client instance
-        MqttClient mqttClient
+        MqttAsyncClient mqttClient
 ) {
-
 }

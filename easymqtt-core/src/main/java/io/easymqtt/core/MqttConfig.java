@@ -3,7 +3,8 @@
  */
 package io.easymqtt.core;
 
-import java.util.Properties;
+
+import java.util.Optional;
 
 /**
  * Project Name: easymqtt
@@ -26,16 +27,16 @@ public record MqttConfig(
         // mqtt broker password
         String password,
         // mqtt client clean session
-        boolean cleanSession,
+        Boolean cleanSession,
         // mqtt connect timeout
-        int connectTimeout,
+        Integer connectTimeout,
         // mqtt client automatic reconnect
-        boolean automaticReconnect
+        Boolean automaticReconnect
 ){
 
-    public static MqttConfig fromProperties(Properties properties) {
-        String clientId = properties.getProperty(EasyMqttKey.CLIENT_ID);
-
-        return new MqttConfig(clientId, null, null, null, null, false, 0, true);
+    public void validate() {
+        Optional.ofNullable(clientId).orElseThrow(IllegalArgumentException::new);
+        Optional.ofNullable(address).orElseThrow(IllegalArgumentException::new);
+        Optional.ofNullable(port).orElseThrow(IllegalArgumentException::new);
     }
 }

@@ -3,14 +3,17 @@
  */
 package io.easymqtt.core;
 
+import io.easymqtt.domain.AsyncClientInstance;
 import io.easymqtt.domain.ClientId;
 import io.easymqtt.domain.ClientInstance;
 import io.easymqtt.exceptions.EasyMqttException;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -35,6 +38,7 @@ public final class MqttClientFactory {
      */
     public static ClientId createClient(MqttConfig mqttConfig) throws EasyMqttException {
         try {
+            mqttConfig.validate();
             String realClientId = mqttConfig.clientId() + "_" + Math.abs(UUID.randomUUID().hashCode());
             MqttClient client = new MqttClient(mqttConfig.address() + ":" + mqttConfig.port(), realClientId, new MemoryPersistence());
 
@@ -47,6 +51,37 @@ public final class MqttClientFactory {
             ClientId clientId =new ClientId(mqttConfig.clientId(), realClientId);
 
             ClientInstance clientInstance = new ClientInstance(clientId, client);
+
+            MqttClientContainer.registerClient(clientId, clientInstance);
+            return clientId;
+        } catch (Exception e) {
+            throw new EasyMqttException(e.getMessage());
+        }
+    }
+
+    /**
+     * Method Description: create async mqtt client
+     *
+     * @param mqttConfig mqtt client config
+     * @return io.easymqtt.domain.ClientId
+     * @author Carson yangbaopan@gmail.com
+     * @date 2024/8/22 21:22
+     */
+    public static ClientId createAsyncClient(MqttConfig mqttConfig) throws EasyMqttException {
+        try {
+            mqttConfig.validate();
+            String realClientId = mqttConfig.clientId() + "_" + Math.abs(UUID.randomUUID().hashCode());
+            MqttAsyncClient client = new MqttAsyncClient(mqttConfig.address() + ":" + mqttConfig.port(), realClientId, new MemoryPersistence());
+
+            // MQTT connect options
+            MqttConnectOptions connOpts = getMqttConnectOptions(mqttConfig);
+
+            // connect
+            client.connect(connOpts).waitForCompletion();
+
+            ClientId clientId =new ClientId(mqttConfig.clientId(), realClientId);
+
+            AsyncClientInstance clientInstance = new AsyncClientInstance(clientId, client);
 
             MqttClientContainer.registerClient(clientId, clientInstance);
             return clientId;
@@ -73,11 +108,11 @@ public final class MqttClientFactory {
         }
 
         // set clean Session
-        connOpts.setCleanSession(mqttConfig.cleanSession());
+        connOpts.setCleanSession(Objects.isNull(mqttConfig.cleanSession())?Boolean.FALSE:mqttConfig.cleanSession());
         // set connect timeout
-        connOpts.setConnectionTimeout(mqttConfig.connectTimeout());
+        connOpts.setConnectionTimeout(Objects.isNull(mqttConfig.connectTimeout())?0:mqttConfig.connectTimeout());
         // open automatic reconnect
-        connOpts.setAutomaticReconnect(mqttConfig.automaticReconnect());
+        connOpts.setAutomaticReconnect(Objects.isNull(mqttConfig.automaticReconnect())?Boolean.TRUE:mqttConfig.automaticReconnect());
         return connOpts;
     }
 }
