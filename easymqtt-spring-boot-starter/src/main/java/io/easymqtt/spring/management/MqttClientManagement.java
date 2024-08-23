@@ -100,7 +100,7 @@ public class MqttClientManagement {
      */
     public void initClient(Method method, Object bean) {
         MqttListener listener = method.getDeclaredAnnotation(MqttListener.class);
-        MqttConfig mqttConfig = MQTT_CONFIGS.get(listener.clientId());
+        MqttConfig mqttConfig = MQTT_CONFIGS.get(this.environment.resolvePlaceholders(listener.clientId()));
         if(Objects.nonNull(mqttConfig)) {
             ClientId clientId = MqttClientFactory.createClient(mqttConfig);
             List<SubscribeInfo> subscribeInfoList = Arrays.stream(listener.topics())
