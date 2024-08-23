@@ -1,0 +1,11 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /
+
+easymqtt:
+  clients:
+    - id: CLIENT_1
+      address: tcp://127.0.0.1
+      port: 1883
+      clean-session: true

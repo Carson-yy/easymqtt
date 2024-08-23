@@ -13,6 +13,7 @@
     <module>easymqtt-core</module>
       <module>easymqtt-test</module>
       <module>easymqtt-spring-boot-starter</module>
+      <module>easymqtt-spring-boot-starter-test</module>
   </modules>
 
   <properties>

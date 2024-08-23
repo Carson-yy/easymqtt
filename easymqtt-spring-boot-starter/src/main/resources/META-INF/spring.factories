@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  io.easymqtt.spring.configuration.InitMqttClientConfiguration,\
+  io.easymqtt.spring.configuration.LoadListenerBeanProcessor
