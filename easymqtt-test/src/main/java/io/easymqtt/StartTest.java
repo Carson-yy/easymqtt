@@ -27,17 +27,19 @@ public class StartTest {
               "1883",
               null,
                 null,
-                false,
+                true,
                 0,
                 true
         );
 
-        ClientId clientId = MqttClientFactory.createAsyncClient(mqttConfig);
+//        ClientId clientId = MqttClientFactory.createAsyncClient(mqttConfig);
+
+        ClientId clientId = MqttClientFactory.createClient(mqttConfig);
 
         SubscribeInfo subscribeInfo = new SubscribeInfo(
-                "$SYS/#",
+                "$share/dev/device/#",
                 0,
-                (info) -> System.out.println(info)
+                (msg) -> System.out.println(msg)
         );
 
         MqttClientContainer.subscribe(clientId, subscribeInfo);

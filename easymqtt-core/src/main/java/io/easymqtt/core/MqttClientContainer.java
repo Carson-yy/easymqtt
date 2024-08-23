@@ -71,24 +71,20 @@ public final class MqttClientContainer {
         }
 
         if(instance instanceof AsyncClientInstance asyncClientInstance) {
+            asyncClientInstance.mqttClient().setCallback(new EasyMqttAsyncCallback(clientId, subscribeInfo.messageHandler()));
             try{
-                asyncClientInstance.mqttClient().subscribe(
-                        subscribeInfo.topic(),
-                        subscribeInfo.qos(),
-                        (topic, message) -> subscribeInfo.messageHandler().handle(new Message(topic, message.getId(), message.getQos(), message.getPayload(), message.isRetained(), message.isDuplicate())));
-                LOGGER.info("Client " + clientId.clientId() + " subscribe -> " + subscribeInfo.topic());
+                asyncClientInstance.mqttClient().subscribe(subscribeInfo.topic(), subscribeInfo.qos());
+                LOGGER.info("Mqtt Async Client [" + clientId.clientId() + "] subscribe [" + subscribeInfo.topic() + "]");
             } catch (MqttException e) {
                 throw new EasyMqttException(e.getMessage());
             }
         }
 
         if(instance instanceof ClientInstance clientInstance) {
+            clientInstance.mqttClient().setCallback(new EasyMqttCallback(clientId, subscribeInfo.messageHandler()));
             try{
-                clientInstance.mqttClient().subscribe(
-                        subscribeInfo.topic(),
-                        subscribeInfo.qos(),
-                        (topic, message) -> subscribeInfo.messageHandler().handle(new Message(topic, message.getId(), message.getQos(), message.getPayload(), message.isRetained(), message.isDuplicate())));
-                LOGGER.info("Client " + clientId.clientId() + " subscribe -> " + subscribeInfo.topic());
+                clientInstance.mqttClient().subscribe(subscribeInfo.topic(), subscribeInfo.qos());
+                LOGGER.info("Mqtt Client [" + clientId.clientId() + "] subscribe [" + subscribeInfo.topic() + "]");
             } catch (MqttException e) {
                 throw new EasyMqttException(e.getMessage());
             }
