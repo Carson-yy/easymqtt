@@ -1,7 +1,7 @@
 /**
  * Copyright © 2024 Carson. All Right Reserved.
  */
-package io.easymqtt.core;
+package io.easymqtt.handle;
 
 import io.easymqtt.domain.Message;
 

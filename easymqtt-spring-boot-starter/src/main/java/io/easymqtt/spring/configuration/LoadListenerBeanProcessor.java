@@ -3,8 +3,9 @@
  */
 package io.easymqtt.spring.configuration;
 
-import io.easymqtt.spring.annotations.AsyncMqttListener;
 import io.easymqtt.spring.annotations.MqttListener;
+import io.easymqtt.spring.annotations.QueueMqttListener;
+import io.easymqtt.spring.annotations.ShareMqttListener;
 import io.easymqtt.spring.management.MqttClientManagement;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeansException;
@@ -47,8 +48,11 @@ public class LoadListenerBeanProcessor implements BeanPostProcessor {
             if(method.isAnnotationPresent(MqttListener.class)){
                 this.mqttClientManagement.initClient(method, bean);
             }
-            if(method.isAnnotationPresent(AsyncMqttListener.class)) {
-                this.mqttClientManagement.initAsyncClient(method, bean);
+            if(method.isAnnotationPresent(ShareMqttListener.class)) {
+                this.mqttClientManagement.initShareClient(method, bean);
+            }
+            if(method.isAnnotationPresent(QueueMqttListener.class)) {
+                this.mqttClientManagement.initQueueClient(method, bean);
             }
         }
         return bean;

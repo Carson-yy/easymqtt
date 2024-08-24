@@ -5,7 +5,7 @@ package io.easymqtt;
 
 import io.easymqtt.core.MqttClientContainer;
 import io.easymqtt.core.MqttClientFactory;
-import io.easymqtt.core.MqttConfig;
+import io.easymqtt.config.MqttConfig;
 import io.easymqtt.domain.ClientId;
 import io.easymqtt.domain.SubscribeInfo;
 
@@ -32,13 +32,14 @@ public class StartTest {
                 true
         );
 
-//        ClientId clientId = MqttClientFactory.createAsyncClient(mqttConfig);
+//        String clientId = MqttClientFactory.createAsyncClient(mqttConfig);
 
-        ClientId clientId = MqttClientFactory.createClient(mqttConfig);
+        String clientId = MqttClientFactory.createClient(mqttConfig);
 
         SubscribeInfo subscribeInfo = new SubscribeInfo(
                 "$share/dev/device/#",
                 0,
+                "demo",
                 (msg) -> System.out.println(msg)
         );
 

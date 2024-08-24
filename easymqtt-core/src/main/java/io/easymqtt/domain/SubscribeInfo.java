@@ -3,11 +3,9 @@
  */
 package io.easymqtt.domain;
 
-import io.easymqtt.core.MqttMessageHandler;
+import io.easymqtt.handle.MqttMessageHandler;
 
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Project Name: easymqtt
@@ -20,6 +18,7 @@ import java.util.function.Function;
 public record SubscribeInfo(
         String topic,
         int qos,
+        String handlerName,
         MqttMessageHandler messageHandler
 ) {
     public void validate() {
