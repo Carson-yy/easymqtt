@@ -40,7 +40,7 @@ public class EasyMqttAsyncCallback implements MqttCallback {
 
     @Override
     public void connectionLost(Throwable cause) {
-        LOGGER.warning("MQTT client [" + this.clientId.clientId() + "] connection lost!");
+        LOGGER.warning("MQTT client [" + this.clientId.clientId() + "] connection lost! because " + cause.getMessage());
     }
 
     @Override
@@ -55,6 +55,8 @@ public class EasyMqttAsyncCallback implements MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
-        LOGGER.info("Message delivered to broker: " + token.getMessageId());
+        LOGGER.info("Message delivered to broker messageId: " + token.getMessageId()
+                + ", send topic: " + String.join(",", token.getTopics())
+                + ", is Completed");
     }
 }

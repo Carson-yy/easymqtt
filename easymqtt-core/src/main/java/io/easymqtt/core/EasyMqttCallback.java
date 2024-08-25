@@ -55,6 +55,8 @@ public class EasyMqttCallback implements MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
-        LOGGER.info("Message delivered to broker: " + token.getMessageId());
+        LOGGER.info("Message delivered to broker messageId: " + token.getMessageId()
+                    + ", send topic: " + String.join(",", token.getTopics())
+                    + ", is Completed");
     }
 }

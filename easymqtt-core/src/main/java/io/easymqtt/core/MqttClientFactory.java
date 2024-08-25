@@ -4,9 +4,9 @@
 package io.easymqtt.core;
 
 import io.easymqtt.config.MqttConfig;
-import io.easymqtt.domain.AsyncClientInstance;
+import io.easymqtt.domain.instance.AsyncClientInstance;
 import io.easymqtt.domain.ClientId;
-import io.easymqtt.domain.ClientInstance;
+import io.easymqtt.domain.instance.GenericClientInstance;
 import io.easymqtt.exceptions.EasyMqttException;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -39,7 +39,7 @@ public final class MqttClientFactory {
      */
     public static String createClient(MqttConfig mqttConfig) throws EasyMqttException {
         try {
-            String id = MqttClientContainer.getClient(mqttConfig.clientId());
+            String id = MqttClientContainer.getClientId(mqttConfig.clientId());
             if (StringUtils.isBlank(id)) {
                 mqttConfig.validate();
                 String realClientId = mqttConfig.clientId() + "_" + Math.abs(UUID.randomUUID().hashCode());
@@ -55,7 +55,7 @@ public final class MqttClientFactory {
                 // connect
                 client.connect(connOpts);
 
-                ClientInstance clientInstance = new ClientInstance(clientId, client);
+                GenericClientInstance clientInstance = new GenericClientInstance(clientId, client);
 
                 MqttClientContainer.registerClient(clientId, clientInstance);
             }
@@ -75,7 +75,7 @@ public final class MqttClientFactory {
      */
     public static String createAsyncClient(MqttConfig mqttConfig) throws EasyMqttException {
         try {
-            String id = MqttClientContainer.getClient(mqttConfig.clientId());
+            String id = MqttClientContainer.getClientId(mqttConfig.clientId());
             if(StringUtils.isBlank(id)) {
                 mqttConfig.validate();
                 String realClientId = mqttConfig.clientId() + "_" + Math.abs(UUID.randomUUID().hashCode());

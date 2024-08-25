@@ -16,7 +16,7 @@ import io.easymqtt.domain.SubscribeInfo;
  * @description
  * @date 2024/8/21 20:36
  */
-public class StartTest {
+public class SubscribeTest {
 
 
     public static void main(String[] args) {
