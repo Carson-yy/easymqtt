@@ -4,9 +4,7 @@
 package io.easymqtt.listeners;
 
 import io.easymqtt.domain.Message;
-import io.easymqtt.spring.annotations.MqttListener;
 import io.easymqtt.spring.annotations.QueueMqttListener;
-import io.easymqtt.spring.annotations.ShareMqttListener;
 import io.easymqtt.spring.annotations.Topic;
 import org.springframework.stereotype.Service;
 

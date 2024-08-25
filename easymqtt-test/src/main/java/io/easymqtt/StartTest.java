@@ -6,7 +6,6 @@ package io.easymqtt;
 import io.easymqtt.core.MqttClientContainer;
 import io.easymqtt.core.MqttClientFactory;
 import io.easymqtt.config.MqttConfig;
-import io.easymqtt.domain.ClientId;
 import io.easymqtt.domain.SubscribeInfo;
 
 /**

@@ -4,7 +4,6 @@
 package io.easymqtt.domain;
 
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 
 /**
  * Project Name: easymqtt

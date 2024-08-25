@@ -63,6 +63,7 @@ public class MqttClientManagement {
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/22 22:00
      */
+    @SuppressWarnings("unused")
     private void init() {
         List<MqttClientProperties> clients = this.properties.getClients();
         if(!CollectionUtils.isEmpty(clients)) {
@@ -88,6 +89,7 @@ public class MqttClientManagement {
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/22 22:31
      */
+    @SuppressWarnings("unused")
     private void destroy() {
         MqttClientContainer.disconnected();
     }
