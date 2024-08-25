@@ -1,12 +1,11 @@
 /**
  * Copyright © 2024 Carson. All Right Reserved.
  */
-package io.easymqtt.callback;
+package io.easymqtt.core;
 
-import io.easymqtt.core.MqttClientContainer;
+import io.easymqtt.handle.MqttMessageHandler;
 import io.easymqtt.domain.ClientId;
 import io.easymqtt.domain.Message;
-import io.easymqtt.handle.MqttMessageHandler;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -23,25 +22,25 @@ import java.util.logging.Logger;
  * @description
  * @date 2024/8/23 20:35
  */
-public class EasyMqttCallback implements MqttCallback {
+public class EasyMqttAsyncCallback implements MqttCallback {
 
     /**
      * LOGGER
      */
-    private static final Logger LOGGER = Logger.getLogger(EasyMqttCallback.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EasyMqttAsyncCallback.class.getName());
 
     /**
      * mqtt client id
      */
     private final ClientId clientId;
 
-    public EasyMqttCallback(ClientId clientId) {
+    public EasyMqttAsyncCallback(ClientId clientId) {
         this.clientId = clientId;
     }
 
     @Override
     public void connectionLost(Throwable cause) {
-        LOGGER.warning("MQTT client [" + this.clientId.clientId() + "] connection lost! because " + cause.getMessage());
+        LOGGER.warning("MQTT client [" + this.clientId.clientId() + "] connection lost!");
     }
 
     @Override

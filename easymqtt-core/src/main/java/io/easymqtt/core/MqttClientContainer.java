@@ -157,7 +157,7 @@ public final class MqttClientContainer {
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/24 15:36
      */
-    public static List<MqttMessageHandler> getMqttMessageHandlers(ClientId clientId, String topic) {
+    static List<MqttMessageHandler> getMqttMessageHandlers(ClientId clientId, String topic) {
         Map<String, List<SubscribeInfo>> subscribeInfoMap = SUBSCRIBE_TOPICS_MAP.get(clientId.clientId());
         if(Objects.isNull(subscribeInfoMap) || subscribeInfoMap.isEmpty()) {
             return null;
@@ -180,7 +180,7 @@ public final class MqttClientContainer {
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/24 18:17
      */
-    public static String getClient(String clientId) {
+    static String getClient(String clientId) {
         return CLIENTS.keySet().stream().filter(s -> s.equals(clientId)).findFirst().orElse(null);
     }
 }

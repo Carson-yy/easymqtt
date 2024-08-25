@@ -3,8 +3,6 @@
  */
 package io.easymqtt.core;
 
-import io.easymqtt.callback.EasyMqttAsyncCallback;
-import io.easymqtt.callback.EasyMqttCallback;
 import io.easymqtt.config.MqttConfig;
 import io.easymqtt.domain.AsyncClientInstance;
 import io.easymqtt.domain.ClientId;
