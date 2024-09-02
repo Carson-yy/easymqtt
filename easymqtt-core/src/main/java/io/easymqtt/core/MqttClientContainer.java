@@ -32,7 +32,8 @@ public final class MqttClientContainer {
     /**
      * client subscribe info
      */
-    private static final Map<String, Map<String, List<SubscribeInfo>>> SUBSCRIBE_TOPICS_MAP = new ConcurrentHashMap<>(16);
+    private static final Map<String, Map<String, List<SubscribeInfo>>> SUBSCRIBE_TOPICS_MAP = new ConcurrentHashMap<>(
+            16);
 
     private MqttClientContainer() {
     }
@@ -48,25 +49,33 @@ public final class MqttClientContainer {
     private static final Map<String, ClientInstance<?>> CLIENTS = new HashMap<>(16);
 
     /**
+     * CLIENT_AUTORECONNECT
+     */
+    private static final Map<String, Boolean> CLIENT_AUTORECONNECT = new HashMap<>(16);
+
+    /**
      * Method Description: register client
      *
-     * @param clientId mqtt client id
+     * @param clientId       mqtt client id
      * @param clientInstance mqtt client instance
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/19 20:53
      */
     static <T> void registerClient(ClientId clientId, ClientInstance<T> clientInstance) {
-        if(CLIENT_ID_MAP.containsKey(clientId.clientId())) {
+        if (CLIENT_ID_MAP.containsKey(clientId.clientId())) {
             throw new EasyMqttException("Duplicate register client id: " + clientId.clientId());
         }
         CLIENT_ID_MAP.put(clientId.clientId(), clientId.realClientId());
         CLIENTS.put(clientId.clientId(), clientInstance);
+        CLIENT_AUTORECONNECT.put(clientId.clientId(),
+                Objects.isNull(clientInstance.getConfig().automaticReconnect()) ? Boolean.TRUE
+                        : clientInstance.getConfig().automaticReconnect());
     }
 
     /**
      * Method Description: subscribe
      *
-     * @param clientId mqtt client id
+     * @param clientId      mqtt client id
      * @param subscribeInfo subscribe info
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/21 22:13
@@ -74,21 +83,21 @@ public final class MqttClientContainer {
     public static void subscribe(String clientId, SubscribeInfo subscribeInfo) {
         subscribeInfo.validate();
         ClientInstance<?> instance = CLIENTS.get(clientId);
-        if(Objects.isNull(instance)) {
+        if (Objects.isNull(instance)) {
             LOGGER.warning("Client " + clientId + " instance not found");
             return;
         }
 
-        if(instance instanceof AsyncClientInstance asyncClientInstance) {
-            try{
+        if (instance instanceof AsyncClientInstance asyncClientInstance) {
+            try {
                 cacheSubscribeInfo(clientId, subscribeInfo);
                 asyncClientInstance.getMqttClient().subscribe(subscribeInfo.topic(), subscribeInfo.qos());
                 LOGGER.info("Mqtt Async Client [" + clientId + "] subscribe [" + subscribeInfo.topic() + "]");
             } catch (MqttException e) {
                 throw new EasyMqttException(e.getMessage());
             }
-        } else if(instance instanceof GenericClientInstance genericClientInstance) {
-            try{
+        } else if (instance instanceof GenericClientInstance genericClientInstance) {
+            try {
                 cacheSubscribeInfo(clientId, subscribeInfo);
                 genericClientInstance.getMqttClient().subscribe(subscribeInfo.topic(), subscribeInfo.qos());
                 LOGGER.info("Mqtt Client [" + clientId + "] subscribe [" + subscribeInfo.topic() + "]");
@@ -104,29 +113,31 @@ public final class MqttClientContainer {
      * Method Description: subscribe internal
      *
      * @param clientId mqtt client id
-     * @param topic subscribe topic
-     * @param qos qos
+     * @param topic    subscribe topic
+     * @param qos      qos
      * @param consumer message consumer
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/25 18:51
      */
     static void subscribe(String clientId, String topic, int qos, Consumer<Message> consumer) {
         ClientInstance<?> instance = CLIENTS.get(clientId);
-        if(Objects.isNull(instance)) {
+        if (Objects.isNull(instance)) {
             LOGGER.warning("Client " + clientId + " instance not found");
             return;
         }
 
-        if(instance instanceof AsyncClientInstance asyncClientInstance) {
-            try{
-                asyncClientInstance.getMqttClient().subscribe(topic, qos, (tp, msg) -> consumer.accept(Message.ofMqttMessage(tp, msg)));
+        if (instance instanceof AsyncClientInstance asyncClientInstance) {
+            try {
+                asyncClientInstance.getMqttClient().subscribe(topic, qos,
+                        (tp, msg) -> consumer.accept(Message.ofMqttMessage(tp, msg)));
                 LOGGER.info("Mqtt Async Client [" + clientId + "] subscribe [" + topic + "]");
             } catch (MqttException e) {
                 throw new EasyMqttException(e.getMessage());
             }
-        } else if(instance instanceof GenericClientInstance genericClientInstance) {
-            try{
-                genericClientInstance.getMqttClient().subscribe(topic, qos,  (tp, msg) -> consumer.accept(Message.ofMqttMessage(tp, msg)));
+        } else if (instance instanceof GenericClientInstance genericClientInstance) {
+            try {
+                genericClientInstance.getMqttClient().subscribe(topic, qos,
+                        (tp, msg) -> consumer.accept(Message.ofMqttMessage(tp, msg)));
                 LOGGER.info("Mqtt Client [" + clientId + "] subscribe [" + topic + "]");
             } catch (MqttException e) {
                 throw new EasyMqttException(e.getMessage());
@@ -140,24 +151,38 @@ public final class MqttClientContainer {
      * cache client topic and subscribe info
      */
     private static void cacheSubscribeInfo(String clientId, SubscribeInfo subscribeInfo) {
-        Map<String, List<SubscribeInfo>> topicSubscribeInfo = SUBSCRIBE_TOPICS_MAP.getOrDefault(clientId, new HashMap<>(16));
-        List<SubscribeInfo> subscribeInfoList = topicSubscribeInfo.getOrDefault(subscribeInfo.topic(), new ArrayList<>());
+        Map<String, List<SubscribeInfo>> topicSubscribeInfo = SUBSCRIBE_TOPICS_MAP.getOrDefault(clientId,
+                new HashMap<>(16));
+        List<SubscribeInfo> subscribeInfoList = topicSubscribeInfo.getOrDefault(subscribeInfo.topic(),
+                new ArrayList<>());
         subscribeInfoList.add(subscribeInfo);
         topicSubscribeInfo.put(subscribeInfo.topic(), subscribeInfoList);
         SUBSCRIBE_TOPICS_MAP.put(clientId, topicSubscribeInfo);
     }
 
     /**
+     * Method Description: get Subscribe Info
+     *
+     * @param clientId clientId
+     * @return java.util.Map<String, List<SubscribeInfo>>
+     * @author yangbaopan yangbaopan@gmail.com
+     * @date 2024/09/02 21:01:54
+     */
+    public static Map<String, List<SubscribeInfo>> getSubscribeInfo(String clientId) {
+        return SUBSCRIBE_TOPICS_MAP.getOrDefault(clientId, Collections.emptyMap());
+    }
+
+    /**
      * Method Description: clean cache subscribe info
      *
      * @param clientId mqtt client id
-     * @param topic topic
+     * @param topic    topic
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/25 18:31
      */
-    private static void cleanSubscribeInfo(String clientId, String topic) {
+    public static void cleanSubscribeInfo(String clientId, String topic) {
         Map<String, List<SubscribeInfo>> topicSubscribeInfo = SUBSCRIBE_TOPICS_MAP.get(clientId);
-        if(Objects.nonNull(topicSubscribeInfo)) {
+        if (Objects.nonNull(topicSubscribeInfo)) {
             topicSubscribeInfo.remove(topic);
         }
     }
@@ -170,18 +195,20 @@ public final class MqttClientContainer {
      */
     public static void disconnected() {
         CLIENTS.forEach((clientId, o) -> {
-            if(o instanceof AsyncClientInstance asyncClientInstance) {
-                if(asyncClientInstance.getMqttClient().isConnected()) {
-                    try{
+            if (o instanceof AsyncClientInstance asyncClientInstance) {
+                if (asyncClientInstance.getMqttClient().isConnected()) {
+                    try {
                         asyncClientInstance.getMqttClient().disconnect();
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
-            if(o instanceof GenericClientInstance genericClientInstance) {
-                if(genericClientInstance.getMqttClient().isConnected()) {
-                    try{
+            if (o instanceof GenericClientInstance genericClientInstance) {
+                if (genericClientInstance.getMqttClient().isConnected()) {
+                    try {
                         genericClientInstance.getMqttClient().disconnect();
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         });
@@ -191,14 +218,14 @@ public final class MqttClientContainer {
      * Method Description: get subscribe message handler
      *
      * @param clientId mqtt client id
-     * @param topic topic
+     * @param topic    topic
      * @return io.easymqtt.handle.MqttMessageHandler
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/24 15:36
      */
     static List<MqttMessageHandler> getMqttMessageHandlers(ClientId clientId, String topic) {
         Map<String, List<SubscribeInfo>> subscribeInfoMap = SUBSCRIBE_TOPICS_MAP.get(clientId.clientId());
-        if(Objects.isNull(subscribeInfoMap) || subscribeInfoMap.isEmpty()) {
+        if (Objects.isNull(subscribeInfoMap) || subscribeInfoMap.isEmpty()) {
             return null;
         }
         return subscribeInfoMap.entrySet().stream()
@@ -239,7 +266,7 @@ public final class MqttClientContainer {
      * Method Description:
      *
      * @param clientId mqtt client id
-     * @param topic unsubscribe topic
+     * @param topic    unsubscribe topic
      * @author Carson yangbaopan@gmail.com
      * @date 2024/8/25 18:26
      */
@@ -247,10 +274,10 @@ public final class MqttClientContainer {
         Object object = getClient(clientId);
         try {
             LOGGER.info("Mqtt client " + clientId + " unsubscribe [" + topic + "]");
-            if(object instanceof GenericClientInstance genericClientInstance) {
+            if (object instanceof GenericClientInstance genericClientInstance) {
                 genericClientInstance.getMqttClient().unsubscribe(topic);
             }
-            if(object instanceof AsyncClientInstance asyncClientInstance) {
+            if (object instanceof AsyncClientInstance asyncClientInstance) {
                 asyncClientInstance.getMqttClient().unsubscribe(topic);
             }
             // clean cache subscribe
@@ -269,20 +296,27 @@ public final class MqttClientContainer {
      */
     static void publish(PublishMessage message) {
         Object object = getClient(message.clientId());
-        if(object instanceof GenericClientInstance genericClientInstance) {
+        if (object instanceof GenericClientInstance genericClientInstance) {
             try {
-                genericClientInstance.getMqttClient().publish(message.topic(), message.payload(), message.qos(), message.isRetained());
+                genericClientInstance.getMqttClient().publish(message.topic(), message.payload(), message.qos(),
+                        message.isRetained());
             } catch (MqttException e) {
                 throw new EasyMqttException(e.getMessage());
             }
         }
 
-        if(object instanceof AsyncClientInstance asyncClientInstance) {
+        if (object instanceof AsyncClientInstance asyncClientInstance) {
             try {
-                asyncClientInstance.getMqttClient().publish(message.topic(), message.payload(), message.qos(), message.isRetained());
+                asyncClientInstance.getMqttClient().publish(message.topic(), message.payload(), message.qos(),
+                        message.isRetained());
             } catch (MqttException e) {
                 throw new EasyMqttException(e.getMessage());
             }
         }
+    }
+
+    public static boolean validationOpenAutoReconnect() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'validationOpenAutoReconnect'");
     }
 }
