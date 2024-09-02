@@ -3,6 +3,7 @@
  */
 package io.easymqtt.domain.instance;
 
+import io.easymqtt.config.MqttConfig;
 import io.easymqtt.domain.ClientId;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 
@@ -16,7 +17,7 @@ import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
  */
 public class AsyncClientInstance extends ClientInstance<MqttAsyncClient> {
 
-    public AsyncClientInstance(ClientId clientId, MqttAsyncClient mqttClient) {
-        super(clientId, mqttClient);
+    public AsyncClientInstance(ClientId clientId, MqttConfig config, MqttAsyncClient mqttClient) {
+        super(clientId, config, mqttClient);
     }
 }

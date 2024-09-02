@@ -39,7 +39,16 @@ public class SubscribeTest {
                 "$share/dev/device/#",
                 0,
                 "demo",
-                (msg) -> System.out.println(msg)
+                (msg) -> {
+                    System.out.println(msg);
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    throw new RuntimeException("dead");
+                    
+                }
         );
 
         MqttClientContainer.subscribe(clientId, subscribeInfo);

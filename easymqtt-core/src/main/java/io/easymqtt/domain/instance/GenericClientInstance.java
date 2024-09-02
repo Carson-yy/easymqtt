@@ -3,6 +3,7 @@
  */
 package io.easymqtt.domain.instance;
 
+import io.easymqtt.config.MqttConfig;
 import io.easymqtt.domain.ClientId;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 
@@ -16,7 +17,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
  */
 public class GenericClientInstance extends ClientInstance<MqttClient> {
 
-    public GenericClientInstance(ClientId clientId, MqttClient mqttClient) {
-        super(clientId, mqttClient);
+    public GenericClientInstance(ClientId clientId, MqttConfig config, MqttClient mqttClient) {
+        super(clientId, config, mqttClient);
     }
 }

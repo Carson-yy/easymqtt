@@ -4,6 +4,7 @@
 package io.easymqtt.domain.instance;
 
 
+import io.easymqtt.config.MqttConfig;
 import io.easymqtt.domain.ClientId;
 
 /**
@@ -22,12 +23,18 @@ public abstract class ClientInstance<T> {
     private ClientId clientId;
 
     /**
+     * mqtt config
+     */
+    private MqttConfig config;
+
+    /**
      * mqtt client instance
      */
     private T mqttClient;
 
-    public ClientInstance(ClientId clientId, T mqttClient) {
+    public ClientInstance(ClientId clientId, MqttConfig config, T mqttClient) {
         this.clientId = clientId;
+        this.config = config;
         this.mqttClient = mqttClient;
     }
 
@@ -47,4 +54,13 @@ public abstract class ClientInstance<T> {
         this.mqttClient = mqttClient;
     }
 
+    public MqttConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(MqttConfig config) {
+        this.config = config;
+    }
+
+    
 }

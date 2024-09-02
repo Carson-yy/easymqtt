@@ -55,7 +55,7 @@ public final class MqttClientFactory {
                 // connect
                 client.connect(connOpts);
 
-                GenericClientInstance clientInstance = new GenericClientInstance(clientId, client);
+                GenericClientInstance clientInstance = new GenericClientInstance(clientId, mqttConfig, client);
 
                 MqttClientContainer.registerClient(clientId, clientInstance);
             }
@@ -91,7 +91,7 @@ public final class MqttClientFactory {
                 // connect
                 client.connect(connOpts).waitForCompletion();
 
-                AsyncClientInstance clientInstance = new AsyncClientInstance(clientId, client);
+                AsyncClientInstance clientInstance = new AsyncClientInstance(clientId, mqttConfig, client);
 
                 MqttClientContainer.registerClient(clientId, clientInstance);
             }
