@@ -27,7 +27,7 @@ public final class EasyMqttClientMonitor {
     /**
      * FUTURES
      */    
-    private final static ConcurrentHashMap<String, ScheduledFuture<?>> SCHEDULEDS = new ConcurrentHashMap<>(16);
+    private final static ConcurrentHashMap<String, ScheduledFuture<?>> SCHEDULED_MAP = new ConcurrentHashMap<>(16);
 
     private EasyMqttClientMonitor() {
 
@@ -41,8 +41,8 @@ public final class EasyMqttClientMonitor {
      * @date 2024/09/02 20:46:53
      */    
     public static void addReconnectClient(String clientId) {
-        ScheduledFuture<?> scheduledFuture =  SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> new ReconnectTask(clientId), 1000L, 1000L, TimeUnit.SECONDS);
-        SCHEDULEDS.put(clientId, scheduledFuture); 
+        ScheduledFuture<?> scheduledFuture =  SCHEDULED_EXECUTOR.scheduleAtFixedRate(new ReconnectTask(clientId), 1L, 1L, TimeUnit.SECONDS);
+        SCHEDULED_MAP.put(clientId, scheduledFuture);
     }
     
     /**
@@ -53,7 +53,7 @@ public final class EasyMqttClientMonitor {
      * @date 2024/09/02 20:49:40
      */    
     public static void cancelScheduled(String clientId) {
-        ScheduledFuture<?> scheduledFuture = SCHEDULEDS.get(clientId);
+        ScheduledFuture<?> scheduledFuture = SCHEDULED_MAP.get(clientId);
         if(Objects.nonNull(scheduledFuture) && !scheduledFuture.isCancelled()) {
             scheduledFuture.cancel(false);
         }

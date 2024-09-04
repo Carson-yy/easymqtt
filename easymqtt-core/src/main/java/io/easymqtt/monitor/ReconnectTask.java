@@ -1,16 +1,14 @@
 package io.easymqtt.monitor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Map.Entry;
+import java.util.*;
+import java.util.logging.Logger;
 
 import io.easymqtt.core.MqttClientContainer;
+import io.easymqtt.core.cache.EasyMqttCacheFactory;
 import io.easymqtt.domain.SubscribeInfo;
 import io.easymqtt.domain.instance.AsyncClientInstance;
-import io.easymqtt.domain.instance.ClientInstance;
 import io.easymqtt.domain.instance.GenericClientInstance;
+import io.easymqtt.exceptions.EasyMqttException;
 
 /**
  * Project Name: easymqtt
@@ -23,9 +21,14 @@ import io.easymqtt.domain.instance.GenericClientInstance;
 public class ReconnectTask implements Runnable {
 
     /**
+     * LOGGER
+     */
+    private static final Logger LOGGER = Logger.getLogger(ReconnectTask.class.getName());
+
+    /**
      * mqtt client id
      */
-    private String clientId;
+    private final String clientId;
 
     /**
      * mqtt client
@@ -35,7 +38,7 @@ public class ReconnectTask implements Runnable {
     /**
      * subscribes
      */
-    private Map<String, List<SubscribeInfo>> subscribes;
+    private final Map<String, Set<SubscribeInfo>> subscribes;
 
     /**
      * Method Description: Create New Instance
@@ -46,23 +49,12 @@ public class ReconnectTask implements Runnable {
      */
     public ReconnectTask(String clientId) {
         this.clientId = clientId;
-        this.mqttClient = getMqttClient();
-        this.subscribes = MqttClientContainer.getSubscribeInfo(clientId);
-    }
-
-    /**
-     * Method Description: get Mqtt Client
-     *
-     * @return org.eclipse.paho.client.mqttv3.MqttClient
-     * @author yangbaopan yangbaopan@gmail.com
-     * @date 2024/09/02 20:50:49
-     */
-    private Object getMqttClient() {
-        Object object = MqttClientContainer.getClient(this.clientId);
-        if (Objects.nonNull(object) && object instanceof ClientInstance clientInstance) {
-            return clientInstance.getMqttClient();
+        try {
+            this.mqttClient = EasyMqttCacheFactory.getClient(clientId);
+        } catch (EasyMqttException e) {
+            LOGGER.severe(e.getMessage());
         }
-        return null;
+        this.subscribes = EasyMqttCacheFactory.getSubscribeByClientId(clientId);
     }
 
     /**
@@ -84,6 +76,7 @@ public class ReconnectTask implements Runnable {
                 }
             }
         } else {
+            LOGGER.info("MQTT client is not found or subscribe is empty, cancel reconnect task!");
             // mqtt client not exist，cancel task
             EasyMqttClientMonitor.cancelScheduled(this.clientId);
         }
@@ -96,12 +89,13 @@ public class ReconnectTask implements Runnable {
      * @date 2024/09/02 21:08:40
      */    
     private void reconnect() {
+        LOGGER.info("MQTT client reconnect successfully, start resubscribes!");
         // connected
         // clean cache
-        subscribes.keySet().forEach(topic -> MqttClientContainer.cleanSubscribeInfo(this.clientId, topic));
+        EasyMqttCacheFactory.cleanClientAllBind(this.clientId);
 
         // resubscribe
-        List<SubscribeInfo> subscribeInfoList = subscribes.entrySet().stream().map(Entry::getValue)
+        List<SubscribeInfo> subscribeInfoList = subscribes.values().stream()
                 .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
         subscribeInfoList.forEach(subscribeInfo -> MqttClientContainer.subscribe(this.clientId, subscribeInfo));
 

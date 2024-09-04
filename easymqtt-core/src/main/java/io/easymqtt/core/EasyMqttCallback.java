@@ -44,7 +44,7 @@ public class EasyMqttCallback implements MqttCallback {
     public void connectionLost(Throwable cause) {
         LOGGER.warning("MQTT client [" + this.clientId.clientId() + "] connection lost! because " + cause.getMessage());
 
-        if(MqttClientContainer.validationOpenAutoReconnect()) {
+        if(MqttClientContainer.validationOpenAutoReconnect(this.clientId.clientId())) {
             LOGGER.info("Reconnect task start, clientId: " + this.clientId.clientId());
             // submit reconnect client id to monitor
             EasyMqttClientMonitor.addReconnectClient(this.clientId.clientId()); 
