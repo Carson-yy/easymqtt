@@ -22,7 +22,7 @@ public final class EasyMqttClientMonitor {
     /**
      * SCHEDULED_EXECUTOR
      */    
-    private final static ScheduledExecutorService SCHEDULED_EXECUTOR = new ScheduledThreadPoolExecutor(1);
+    private final static ScheduledExecutorService SCHEDULED_EXECUTOR = new ScheduledThreadPoolExecutor(1, new ReconnectThreadFactory());
 
     /**
      * FUTURES
